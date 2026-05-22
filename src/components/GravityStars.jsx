@@ -1,8 +1,4 @@
-'use client';
-
 import * as React from 'react';
-
-import { cn } from '@/lib/utils';
 
 function GravityStarsBackground({
     starsCount = 75,
@@ -23,7 +19,7 @@ function GravityStarsBackground({
     const canvasRef = React.useRef(null);
     const animRef = React.useRef(null);
     const starsRef = React.useRef([]);
-    const mouseRef = React.useRef({ x: 0, y: 0 });
+    const mouseRef = React.useRef({ active: false, x: 0, y: 0 });
     const [dpr, setDpr] = React.useState(1);
     const [canvasSize, setCanvasSize] = React.useState({
         width: 800,
@@ -97,8 +93,8 @@ function GravityStarsBackground({
         if (!canvas) return;
 
         const rect = canvas.getBoundingClientRect();
-        let clientX = 0;
-        let clientY = 0;
+        let clientX;
+        let clientY;
 
         if ('touches' in e) {
             const t = e.touches[0];
@@ -111,10 +107,18 @@ function GravityStarsBackground({
             clientY = e.clientY;
         }
 
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
         mouseRef.current = {
-            x: clientX - rect.left,
-            y: clientY - rect.top,
+            active: x >= 0 && x <= rect.width && y >= 0 && y <= rect.height,
+            x,
+            y,
         };
+    }, []);
+
+    const handlePointerLeave = React.useCallback(() => {
+        mouseRef.current.active = false;
     }, []);
 
     const updateStars = React.useCallback(() => {
@@ -129,7 +133,7 @@ function GravityStarsBackground({
             const dy = mouse.y - p.y;
             const dist = Math.hypot(dx, dy);
 
-            if (dist < mouseInfluence && dist > 0) {
+            if (mouse.active && dist < mouseInfluence && dist > 0) {
                 const force = (mouseInfluence - dist) / mouseInfluence;
                 const nx = dx / dist;
                 const ny = dy / dist;
@@ -143,9 +147,9 @@ function GravityStarsBackground({
                     p.vy -= ny * g;
                 }
 
-                p.opacity = Math.min(1, p.baseOpacity + force * 0.4);
+                p.opacity = Math.min(1, p.baseOpacity + force * 0.65);
 
-                const targetGlow = 1 + force * 2;
+                const targetGlow = 1 + force * 4;
                 const currentGlow = p.glowMultiplier || 1;
 
                 if (glowAnimation === 'instant') {
@@ -280,19 +284,6 @@ function GravityStarsBackground({
         [dpr, glowIntensity, readColor],
     );
 
-    const animate = React.useCallback(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        updateStars();
-        drawStars(ctx);
-
-        animRef.current = requestAnimationFrame(animate);
-    }, [updateStars, drawStars]);
-
     React.useEffect(() => {
         resizeCanvas();
 
@@ -313,6 +304,20 @@ function GravityStarsBackground({
             if (ro && container) ro.disconnect();
         };
     }, [resizeCanvas]);
+
+    React.useEffect(() => {
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerleave', handlePointerLeave);
+        window.addEventListener('touchmove', handlePointerMove, { passive: true });
+        window.addEventListener('touchend', handlePointerLeave);
+
+        return () => {
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerleave', handlePointerLeave);
+            window.removeEventListener('touchmove', handlePointerMove);
+            window.removeEventListener('touchend', handlePointerLeave);
+        };
+    }, [handlePointerMove, handlePointerLeave]);
 
     React.useEffect(() => {
         if (starsRef.current.length === 0) {
@@ -341,6 +346,19 @@ function GravityStarsBackground({
     ]);
 
     React.useEffect(() => {
+        const animate = () => {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            updateStars();
+            drawStars(ctx);
+
+            animRef.current = requestAnimationFrame(animate);
+        };
+
         if (animRef.current) cancelAnimationFrame(animRef.current);
 
         animRef.current = requestAnimationFrame(animate);
@@ -349,15 +367,13 @@ function GravityStarsBackground({
             if (animRef.current) cancelAnimationFrame(animRef.current);
             animRef.current = null;
         };
-    }, [animate]);
+    }, [updateStars, drawStars]);
 
     return (
         <div
             ref={containerRef}
             data-slot="gravity-stars-background"
-            className={cn('relative size-full overflow-hidden', className)}
-            onMouseMove={handlePointerMove}
-            onTouchMove={handlePointerMove}
+            className={`relative size-full overflow-hidden ${className || ''}`}
             {...props}
         >
             <canvas ref={canvasRef} className="block h-full w-full" />
