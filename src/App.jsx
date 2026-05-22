@@ -10,9 +10,10 @@ function App() {
   }
 
   return (
-    <div className="relative min-h-screen" style={{ backgroundColor: '#0D0F14', color: '#F0F2F7' }}>
-
-      {/* Stars background — fixed, fills whole screen */}
+    <div
+      className="relative min-h-screen"
+      style={{ backgroundColor: '#0D0F14', color: '#F0F2F7' }}
+    >
       <div className="fixed inset-0 z-0">
         <GravityStarsBackground
           starsCount={80}
@@ -22,27 +23,27 @@ function App() {
         />
       </div>
 
-      {/* App content — sits on top of stars */}
-      <main className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
-        <div className="w-full max-w-2xl text-center mb-8">
+      <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4">
+        <div className="mb-8 w-full max-w-2xl text-center">
           <h1 className="text-4xl font-semibold">PDF Rearranger</h1>
-          <p className="text-sm mt-2" style={{ color: '#9BA3B8' }}>
-            Reorder pages instantly — 100% in your browser
+          <p className="mt-2 text-sm" style={{ color: '#9BA3B8' }}>
+            Reorder pages instantly - 100% in your browser
           </p>
         </div>
 
         <div className="w-full max-w-2xl">
           {!file ? (
-            <UploadZone onFileSelect={setFile} />
+            <UploadZone onFileSelect={handleFileSelect} />
           ) : (
             <div className="text-center">
-              <p className="text-lg font-medium">✅ File selected:</p>
-              <p className="mt-1" style={{ color: '#9BA3B8' }}>{file.name}</p>
+              <p className="text-lg font-medium">File selected:</p>
+              <p className="mt-1" style={{ color: '#9BA3B8' }}>
+                {file.name}
+              </p>
             </div>
           )}
         </div>
       </main>
-
     </div>
   )
 }
