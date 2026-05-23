@@ -30,7 +30,7 @@ function EditorHero({ onFileSelect }) {
     return (
         <section className="flex w-full max-w-[1120px] flex-col items-center gap-[60px]">
             <div className="flex w-full flex-col items-center gap-8">
-                <div className="w-full self-start pl-[64px] uppercase text-white">
+                <div className="w-full self-start pl-[64px] uppercase text-white mt-16">
                     <h1 className="text-[80px] font-bold leading-[0.94] tracking-[0]">
                         <span className="block">Cheat Smarter</span>
                         <span className="block">

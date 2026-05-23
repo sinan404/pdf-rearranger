@@ -10,7 +10,14 @@ function UploadArrow() {
 function Header({ onUploadClick }) {
   return (
     <header className="relative z-20 mx-[50px] flex h-[60px] w-[calc(100%-100px)] items-center justify-between border border-white bg-black px-5">
-      <p className="text-[22px] font-medium leading-none text-white">Pdf Editor</p>
+      <button
+        type="button"
+        onClick={onHomeClick}
+        className="text-[22px] font-medium leading-none text-white hover:opacity-70 transition-opacity"
+      >
+        Pdf Editor
+      </button>
+      
       <button
         type="button"
         onClick={onUploadClick}
