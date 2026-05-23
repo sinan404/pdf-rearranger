@@ -102,7 +102,10 @@ async function handleConfirm({ rearrange, microsize }) {
         />
       </div>
 
-      <Header onUploadClick={() => document.getElementById('header-upload').click()} />
+      <Header
+        onUploadClick={() => document.getElementById('header-upload').click()}
+        onHomeClick={handleReset}
+      />  
 
       <input
         id="header-upload"
@@ -127,12 +130,12 @@ async function handleConfirm({ rearrange, microsize }) {
 
         {phase === 'processing' && (
           <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-t-blue-500 border-gray-300 rounded-full animate-spin" />
             <p className="text-lg font-medium text-white">Reordering pages…</p>
             <p className="text-sm" style={{ color: '#9BA3B8' }}>{file?.name}</p>
           </div>
         )}
-
+    
         {phase === 'done' && (
           <div className="flex flex-col items-center gap-6 text-center">
             <p className="text-2xl font-semibold text-white">✅ Done!</p>
