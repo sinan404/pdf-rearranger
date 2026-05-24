@@ -7,7 +7,7 @@ function UploadArrow() {
   )
 }
 
-function Header({ onUploadClick }) {
+function Header({ onUploadClick, onHomeClick }) {
   return (
     <header className="relative z-20 mx-[50px] flex h-[60px] w-[calc(100%-100px)] items-center justify-between border border-white bg-black px-5">
       <button
@@ -17,7 +17,7 @@ function Header({ onUploadClick }) {
       >
         Pdf Editor
       </button>
-      
+
       <button
         type="button"
         onClick={onUploadClick}
