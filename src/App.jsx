@@ -8,6 +8,7 @@ import { buildReorderedPdf } from './pdf/builder'
 import { generatePageSequence } from './engine/algorithm'
 import { PDFDocument } from 'pdf-lib'
 import { microsizePdf } from './pdf/microsize'
+import PreviewGrid from './components/PreviewGrid'
 
 
 function App() {
@@ -137,33 +138,30 @@ async function handleConfirm({ rearrange, microsize }) {
         )}
     
         {phase === 'done' && (
-          <div className="flex flex-col items-center gap-6 text-center">
-            <p className="text-2xl font-semibold text-white">✅ Done!</p>
-            <p style={{ color: '#9BA3B8' }}>
-              {originalPageCount} pages → {pageSequence.length} pages output
-            </p>
-            <iframe
-              src={outputUrl + '#toolbar=0'}
-              className="w-full max-w-2xl rounded-xl border border-white/20"
-              style={{ height: '500px' }}
-              title="PDF Preview"
-            />
-            <div className="flex gap-4">
-              <button
-                onClick={handleDownload}
-                className="bg-white text-black px-6 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors"
-              >
-                ⬇ Download PDF
-              </button>
-              <button
-                onClick={() => window.open(outputUrl)}
-                className="border border-white/30 text-white px-6 py-2 rounded-lg font-medium hover:bg-white/10 transition-colors"
-              >
-                🖨 Print
-              </button>
-            </div>
-          </div>
-        )}
+  <div className="flex flex-col items-center gap-6 text-center w-full max-w-2xl">
+    <p className="text-2xl font-semibold text-white">✅ Done!</p>
+    <p style={{ color: '#9BA3B8' }}>
+      {originalPageCount} pages → {pageSequence.length} pages output
+    </p>
+
+    <PreviewGrid pdfUrl={outputUrl} pageSequence={pageSequence} />
+
+    <div className="flex gap-4">
+      <button
+        onClick={handleDownload}
+        className="bg-white text-black px-6 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors"
+      >
+        Download PDF
+      </button>
+      <button
+        onClick={() => window.open(outputUrl)}
+        className="border border-white/30 text-white px-6 py-2 rounded-lg font-medium hover:bg-white/10 transition-colors"
+      >
+        Print
+      </button>
+    </div>
+  </div>
+)}
 
         {phase === 'error' && (
           <div className="flex flex-col items-center gap-4 text-center">
