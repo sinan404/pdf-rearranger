@@ -3,9 +3,20 @@ import * as pdfjsLib from 'pdfjs-dist'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
 
+function isCanvasBlank(canvas) {
+  const ctx = canvas.getContext('2d')
+  const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  for (let i = 0; i < data.length; i += 4) {
+    // if any pixel is not white (255,255,255) → not blank
+    if (data[i] < 250 || data[i + 1] < 250 || data[i + 2] < 250) return false
+  }
+  return true
+}
+
 function PageThumb({ pdfUrl, pageIndex, sourcePageNumber }) {
   const canvasRef = useRef(null)
-  const [dims, setDims] = useState({ width: 120, height: 160 })
+  const [loaded, setLoaded] = useState(false)
+  const [hide, setHide] = useState(false)
 
   useEffect(() => {
     if (!pdfUrl || sourcePageNumber === 0) return
@@ -16,7 +27,6 @@ function PageThumb({ pdfUrl, pageIndex, sourcePageNumber }) {
       const pdfDoc = await loadingTask.promise
       const page = await pdfDoc.getPage(pageIndex + 1)
 
-      // higher scale = better resolution
       const scale = 2.5
       const viewport = page.getViewport({ scale })
 
@@ -26,16 +36,26 @@ function PageThumb({ pdfUrl, pageIndex, sourcePageNumber }) {
       canvas.width = viewport.width
       canvas.height = viewport.height
 
-      // display smaller than actual pixels (crisp)
       const displayW = 200
       const displayH = (viewport.height / viewport.width) * displayW
       canvas.style.width = `${displayW}px`
       canvas.style.height = `${displayH}px`
 
-      setDims({ width: displayW, height: displayH })
-
       const ctx = canvas.getContext('2d')
+      // fill white first so blank detection works
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
       await page.render({ canvasContext: ctx, viewport }).promise
+
+      if (cancelled) return
+
+      // hide if page is completely blank/white
+      if (isCanvasBlank(canvas)) {
+        setHide(true)
+      } else {
+        setLoaded(true)
+      }
     }
 
     render()
@@ -43,6 +63,7 @@ function PageThumb({ pdfUrl, pageIndex, sourcePageNumber }) {
   }, [pdfUrl, pageIndex, sourcePageNumber])
 
   if (sourcePageNumber === 0) return null
+  if (hide) return null
 
   return (
     <div className="flex flex-col items-center gap-2" style={{ width: 208 }}>
@@ -53,14 +74,23 @@ function PageThumb({ pdfUrl, pageIndex, sourcePageNumber }) {
           overflow: 'hidden',
           background: '#fff',
           width: 204,
-          minHeight: 160,
+          minHeight: 280,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          flexShrink: 0,
+          position: 'relative',
         }}
       >
-        <canvas ref={canvasRef} style={{ display: 'block' }} />
+        {!loaded && (
+          <div
+            className="w-6 h-6 border-2 border-t-blue-500 border-gray-300 rounded-full animate-spin"
+            style={{ position: 'absolute' }}
+          />
+        )}
+        <canvas
+          ref={canvasRef}
+          style={{ display: loaded ? 'block' : 'none' }}
+        />
       </div>
       <span className="text-[11px]" style={{ color: '#5C6478' }}>
         p.{sourcePageNumber}
