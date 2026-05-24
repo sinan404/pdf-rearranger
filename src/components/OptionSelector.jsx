@@ -19,10 +19,10 @@ function OptionSelector({ fileName, onConfirm }) {
       {!microsize && (
         <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4">
           <p className="text-sm font-medium text-yellow-300">
-            ⚠️ This PDF will NOT be microsized
+            ⚠️ This PDF should not be in microsized
           </p>
           <p className="mt-1 text-xs" style={{ color: '#9BA3B8' }}>
-            Pages will only be rearranged using the algorithm
+            Only works in normal form
           </p>
         </div>
       )}
@@ -76,7 +76,7 @@ function OptionSelector({ fileName, onConfirm }) {
           cursor: nothingSelected ? 'not-allowed' : 'pointer',
         }}
       >
-        ✓ Confirm & Process
+        Confirm & Process
       </button>
 
     </div>
